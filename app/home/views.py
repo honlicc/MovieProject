@@ -1,6 +1,6 @@
 from . import home
-
+from flask import render_template
 
 @home.route('/')
 def index():
-    return 'ok,home'
+    return render_template('home/index.html')
