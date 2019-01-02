@@ -2,18 +2,7 @@
 # -*- coding:utf-8 -*-
 
 from datetime import datetime
-
-from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-import pymysql
-
-pymysql.install_as_MySQLdb()
-
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = "mysql://root:123456@localhost:3306/movie"
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
-
-db = SQLAlchemy(app)
+from app import db
 
 
 # 会员

@@ -1,8 +1,19 @@
+# ！/user/bin/python3
+# -*- coding:utf-8 -*-
+
 from flask import Flask, render_template
+from flask_sqlalchemy import SQLAlchemy
+import pymysql
+
+pymysql.install_as_MySQLdb()
 
 app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = "mysql://root:123456@localhost:3306/movie"
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
+app.config['SECRET_KEY'] = '7e020166dc284ad187e32cbda0a9d4ac'
 
 app.debug = True
+db = SQLAlchemy(app)
 
 from app.home import home as home_blueprint
 from app.admin import admin as admin_blueprint
