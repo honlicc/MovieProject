@@ -3,7 +3,8 @@
 
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
-from wtforms.validators import DataRequired
+from wtforms.validators import DataRequired,ValidationError
+from app.models import *
 
 
 class LoginForm(FlaskForm):
@@ -16,8 +17,9 @@ class LoginForm(FlaskForm):
         description='账号',  # 描述
         render_kw={
             "class": "form-control",
-            "placeholder": "请输入账号！",
-            #"required": "required"  # 必填项
+            "placeholder": "请输入账号！"
+            # "required": "required"  # 必填项
+
         }
     )
 
@@ -29,15 +31,25 @@ class LoginForm(FlaskForm):
         description='密码',  # 描述
         render_kw={
             "class": "form-control",
-            "placeholder": "请输入密码！",
-            #"required": "required"  # 必填项
+            "placeholder": "请输入密码！"
+            # "required": "required"  # 必填项
         }
 
     )
 
     submit = SubmitField(
-        label='登录',
+        '登录',
         render_kw={
-            "class": "btn btn-primary btn-block btn-flat"
+            "id": "btn-sub",
+            "class": "btn btn-primary btn-block btn-flat",
         }
     )
+
+    #验证器：
+    def validate_account(self,request):
+        account=request.data    #获取请求账号数据
+        admin=Admin.query.filter_by(name=account).first()
+        if not admin:
+            raise ValidationError("账号不存在！")
+
+

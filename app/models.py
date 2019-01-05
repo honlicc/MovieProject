@@ -3,6 +3,7 @@
 
 from datetime import datetime
 from app import db
+from werkzeug.security import check_password_hash
 
 
 # 会员
@@ -128,7 +129,7 @@ class Role(db.Model):
     __tablename__ = 'role'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), unique=True)
-    authos = db.Column(db.String(600))# 权限列表
+    authos = db.Column(db.String(600))  # 权限列表
     addtime = db.Column(db.DateTime, default=datetime.now)
     admins = db.relationship('Admin', backref='role')
 
@@ -150,6 +151,9 @@ class Admin(db.Model):
 
     def __repr__(self):
         return "Admin %r" % self.name
+
+    def check_pwd(self, pwd):
+        return check_password_hash(self.pwd, pwd)
 
 
 # 管理员登录日志模型
