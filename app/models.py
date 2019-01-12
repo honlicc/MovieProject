@@ -130,7 +130,7 @@ class Role(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), unique=True)
     authos = db.Column(db.String(600))  # 权限列表
-    addtime = db.Column(db.DateTime, default=datetime.now)
+    addtime = db.Column(db.DateTime, index=True, default=datetime.now)
     admins = db.relationship('Admin', backref='role')
 
     def __repr__(self):
@@ -143,9 +143,9 @@ class Admin(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), unique=True)
     pwd = db.Column(db.String(100))
-    is_super = db.Column(db.SmallInteger)  # 是否为超级管理员，0 表示是超级管理员
-    role_id = db.Column(db.Integer, db.ForeignKey('role.id'))  # 所属角色
+    is_super = db.Column(db.SmallInteger)  # 是否为超级管理员，0 表示超级管理员
     addtime = db.Column(db.DateTime, index=True, default=datetime.now)
+    role_id = db.Column(db.Integer, db.ForeignKey('role.id'))  # 所属角色
     adminlogs = db.relationship('AdminLog', backref='admin')
     oplogs = db.relationship('OpLog', backref='admin')
 
@@ -186,22 +186,22 @@ class OpLog(db.Model):
 
 
 if __name__ == "__main__":
-    # db.create_all()
-    '''
-    role=Role(
-        name='超级管理员',
-        authos=''
-    )
-    db.session.add(role)
-    db.session.commit()
-    '''
-    # from werkzeug.security import generate_password_hash #密码hash加密
-    # admin=Admin(
-    #     name='movie',
-    #     pwd=generate_password_hash('movie'),
-    #     is_super=0,
-    #     role_id=1,
+    #db.create_all()
+
+    # role=Role(
+    #     name='超级管理员',
+    #     authos=''
     # )
-    #
-    # db.session.add(admin)
+    # db.session.add(role)
     # db.session.commit()
+
+    from werkzeug.security import generate_password_hash #密码hash加密
+    admin=Admin(
+        name='movie',
+        pwd=generate_password_hash('movie'),
+        is_super=0,
+        role_id=1,
+    )
+
+    db.session.add(admin)
+    db.session.commit()
