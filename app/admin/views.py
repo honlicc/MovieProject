@@ -1,10 +1,15 @@
 from flask import render_template, redirect, url_for, flash, session, request, make_response
 
 from app import db
-from app.models import Admin, Tag
+from app.models import Admin, Tag, Movie
 from . import admin
-from app.admin.forms import LoginForm, TagFrom
+from app.admin.forms import LoginForm, TagFrom, MoveForm
 from functools import wraps
+from app import app
+from werkzeug.utils import secure_filename
+import uuid
+import os
+import datetime
 
 
 # 访问控制装饰器
@@ -16,6 +21,13 @@ def admin_login(f):
         return f(*args, **kwargs)
 
     return decorated_function
+
+
+# 修改问价名称
+def change_filename(filename):
+    fileinfo = os.path.splitext(filename)
+    filename = datetime.datetime.now().strftime('%Y%m%d%H%M%S') + str(uuid.uuid4().hex) + fileinfo[-1]
+    return filename
 
 
 @admin.route('/')
@@ -59,7 +71,7 @@ def tag_add():
     if form.validate_on_submit():
         data = form.data
         tag = Tag.query.filter_by(name=data['name']).count()
-        if tag >= 1:
+        if tag == 1:
             flash('标签已存在', 'err')
             return redirect(url_for('admin.tag_add'))
         tag = Tag(
@@ -83,10 +95,70 @@ def tag_list(page=None):
     return render_template('admin/tag_list.html', page_data=page_data)
 
 
-@admin.route('/movie/add/')
+# 删除tag
+@admin.route('/tag/del/<int:id>/', methods=["GET"])
+@admin_login
+def tag_del(id=None):
+    tag = Tag.query.filter_by(id=id).first_or_404()
+    db.session.delete(tag)
+    db.session.commit()
+    flash('删除标签成功', 'ok')
+    return redirect(url_for('admin.tag_list', page=1))
+
+
+# 编辑tag
+@admin.route('/tag/edit/<int:id>/', methods=["GET", "POST"])
+@admin_login
+def tag_edit(id=None):
+    form = TagFrom()
+    tag = Tag.query.get_or_404(id)
+    if form.validate_on_submit():
+        data = form.data
+        tag_count = Tag.query.filter_by(name=data['name']).count()
+        if tag.name != data['name'] and tag_count == 1:
+            flash('标签已存在', 'err')
+            return redirect(url_for('admin.tag_edit', id=id))
+        tag.name = data['name']
+        db.session.add(tag)
+        db.session.commit()
+        flash('标签修改成功', 'ok')
+        redirect(url_for('admin.tag_edit', id=id))
+    return render_template('admin/tag_edit.html', form=form, tag=tag)
+
+
+@admin.route('/movie/add/', methods=["GET", "POST"])
 @admin_login
 def movie_add():
-    return render_template('admin/movie_add.html')
+    form = MoveForm()
+    if form.validate_on_submit():
+        data = form.data
+        file_url = secure_filename(form.url.data.filename)
+        file_logo = secure_filename(form.logo.data.filename)
+        if not os.path.exists(app.config['UP_DIR']):
+            os.makedirs(app.config['UP_DIR'])
+            os.chmod(app.config['UP_DIR'], 'rw')
+        url = change_filename(file_url)
+        logo = change_filename(file_logo)
+        form.url.data.save(app.config['UP_DIR']+url)
+        form.logo.data.save(app.config['UP_DIR']+logo)
+        movie = Movie(
+            title=data['title'],
+            url=url,
+            info=data['info'],
+            logo=logo,
+            star=int(data['star']),
+            playnum=0,
+            commentnum=0,
+            tag_id=int(data['tag_id']),
+            area=data['area'],
+            release_time=data['release_time'],
+            length=data['length'],
+        )
+        db.session.add(movie)
+        db.session.commit()
+        flash('添加电影成功', 'ok')
+        return redirect(url_for('admin.movie_add'))
+    return render_template('admin/movie_add.html', form=form)
 
 
 @admin.route('/movie/list/')
