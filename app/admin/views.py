@@ -139,8 +139,8 @@ def movie_add():
             os.chmod(app.config['UP_DIR'], 'rw')
         url = change_filename(file_url)
         logo = change_filename(file_logo)
-        form.url.data.save(app.config['UP_DIR']+url)
-        form.logo.data.save(app.config['UP_DIR']+logo)
+        form.url.data.save(app.config['UP_DIR'] + url)
+        form.logo.data.save(app.config['UP_DIR'] + logo)
         movie = Movie(
             title=data['title'],
             url=url,
@@ -161,10 +161,27 @@ def movie_add():
     return render_template('admin/movie_add.html', form=form)
 
 
-@admin.route('/movie/list/')
+@admin.route('/movie/list/<int:page>/', methods=["GET"])
 @admin_login
-def movie_list():
-    return render_template('admin/movie_list.html')
+def movie_list(page=None):
+    if page is None:
+        page = 1
+    page_data = Movie.query.join(Tag).filter(
+        Tag.id == Movie.tag_id
+    ).order_by(
+        Movie.addtime.desc()
+    ).paginate(page=page, per_page=10)
+    return render_template('admin/movie_list.html', page_data=page_data)
+
+#删除电影
+@admin.route('/movie/del/<int:id>/', methods=["GET"])
+@admin_login
+def movie_del(id=None):
+    movie=Movie.query.get_or_404(int(id))
+    db.session.delete(movie)
+    db.session.commit()
+    flash('删除电影成功', 'ok')
+    return redirect(url_for('admin.movie_list',page=1))
 
 
 @admin.route('/preview/add/')
