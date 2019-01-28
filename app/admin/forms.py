@@ -77,7 +77,7 @@ class TagFrom(FlaskForm):
     )
 
 
-class MoveForm(FlaskForm):
+class MoiveForm(FlaskForm):
     title = StringField(
         label='片名',
         validators=[
@@ -180,7 +180,7 @@ class MoveForm(FlaskForm):
             "class": "form-control",
             "placeholder": "请选择上映时间！",
             "id": "input_release_time",
-            "placeholder":"请选择上映时间！"
+            "placeholder": "请选择上映时间！"
         }
     )
 
@@ -188,5 +188,35 @@ class MoveForm(FlaskForm):
         label='确定',
         render_kw={
             "class": "btn btn-primary"
+        }
+    )
+
+
+class PreviewForm(FlaskForm):
+    title = StringField(
+        label='预告标题',
+        validators=[
+            DataRequired('预告标题不能为空!')
+        ],
+        description='预告标题',
+        render_kw={
+            "class": "form-control",
+            "id": "input_title",
+            "placeholder": "请上传预告标题！"
+        }
+    )
+
+    logo = FileField(
+        label='预告封面',
+        validators=[
+            DataRequired('预告封面不能为空!')
+        ],
+        description='预告封面',
+    )
+
+    submit = SubmitField(
+        label='确定',
+        render_kw={
+            "class": "btn btn-primary",
         }
     )
