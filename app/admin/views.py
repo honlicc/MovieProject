@@ -1,7 +1,7 @@
 from flask import render_template, redirect, url_for, flash, session, request, make_response
 
 from app import db
-from app.models import Admin, Tag, Movie, Preview
+from app.models import Admin, Tag, Movie, Preview,User,Comment,Moviecol
 from . import admin
 from app.admin.forms import LoginForm, TagFrom, MoiveForm, PreviewForm
 from functools import wraps
@@ -273,7 +273,7 @@ def preview_add():
     return render_template('admin/preview_add.html', form=form)
 
 
-@admin.route('/preview/list/<int:page>', methods=["GET"])
+@admin.route('/preview/list/<int:page>/', methods=["GET"])
 @admin_login
 def preview_list(page=None):
     if page is None:
@@ -293,7 +293,7 @@ def preview_del(id=None):
     flash('删除预告成功', 'ok')
     return redirect(url_for('admin.preview_list', page=1))
 
-@admin.route('/preview/edit/<int:id>', methods=["GET", "POST"])
+@admin.route('/preview/edit/<int:id>/', methods=["GET", "POST"])
 @admin_login
 def preview_edit(id):
     form = PreviewForm()
@@ -304,52 +304,106 @@ def preview_edit(id):
         form.title.data = preview.title
     if form.validate_on_submit():
         data = form.data
-        preview_count = Preview.query.filter_by(title=data["title"]).count()
-
-        if preview.title == data["title"] and preview_count == 1:
-            flash("该影片已经存在了！", "err")
-            return redirect(url_for("admin.preview_edit", id=id))
-
         if data['logo'] != '':
             # file_logo=data['logo']
             preview.logo = change_filename(form.logo.data.filename)
             form.logo.data.save(app.config["UP_DIR"] + preview.logo)
 
-        preview .title=data['title']
-        db.session.add(preview)
-        db.session.commit()
-        flash("编辑预告成功！", "ok")
+        if preview.title !=data['title']:
+            preview.title = data['title']
+            db.session.add(preview)
+            db.session.commit()
+            flash("编辑预告成功！", "ok")
         return redirect(url_for("admin.preview_edit",id=id))
     return render_template('admin/preview_edit.html', form=form,preview=preview)
 
 
 
 # 会员列表
-@admin.route('/user/list/')
+@admin.route('/user/list/<int:page>/',methods=["GET"])
 @admin_login
-def user_list():
-    return render_template('admin/user_list.html')
+def user_list(page=None):
+    if page is None:
+        page=1
+    page_data=User.query.order_by(
+        User.addtime.desc()
+    ).paginate(page=page,per_page=10)
+    return render_template('admin/user_list.html',page_data=page_data)
 
 
 # 会员详情
-@admin.route('/user/view/')
+@admin.route('/user/view/<int:id>/',methods=["GET"])
 @admin_login
-def user_view():
-    return render_template('admin/user_view.html')
+def user_view(id=None):
+    user=User.query.get_or_404(int(id))
+    return render_template('admin/user_view.html',user=user)
+
+
+@admin.route('/user/del/<int:id>/', methods=["GET"])
+@admin_login
+def user_del(id=None):
+    user = User.query.get_or_404(int(id))
+    db.session.delete(user)
+    db.session.commit()
+    flash('会员删除成功', 'ok')
+    return redirect(url_for('admin.user_list', page=1))
 
 
 # 评论列表
-@admin.route('/comment/list/')
+@admin.route('/comment/list/<int:page>/',methods=["GET"])
 @admin_login
-def comment_list():
-    return render_template('admin/comment_list.html')
+def comment_list(page=None):
+    if page is None:
+        page=1
+    page_data=Comment.query.join(
+        Movie
+    ).join(
+        User
+    ).filter(
+        Movie.id==Comment.movie_id,
+        User.id==Comment.user_id
+    ).order_by(
+        Comment.addtime.desc()
+    ).paginate(page=page, per_page=10)
+    return render_template('admin/comment_list.html',page_data=page_data)
+
+@admin.route('/comment/del/<int:id>/', methods=["GET"])
+@admin_login
+def comment_del(id=None):
+    comment = Comment.query.get_or_404(int(id))
+    db.session.delete(comment)
+    db.session.commit()
+    flash('评论删除成功', 'ok')
+    return redirect(url_for('admin.comment_list', page=1))
 
 
 # 电影收藏
-@admin.route('/moviecol/list/')
+@admin.route('/moviecol/list/<int:page>/',methods=["GET"])
 @admin_login
-def moviecol_list():
-    return render_template('admin/moviecol_list.html')
+def moviecol_list(page=None):
+    if page is None:
+        page=1
+    page_data=Moviecol.query.join(
+        Movie
+    ).join(
+        User
+    ).filter(
+        Movie.id==Moviecol.movie_id,
+        User.id==Moviecol.user_id
+    ).order_by(
+        Moviecol.addtime.desc()
+    ).paginate(page=page, per_page=10)
+    return render_template('admin/moviecol_list.html',page_data=page_data)
+
+
+@admin.route('/moviecol/del/<int:id>/', methods=["GET"])
+@admin_login
+def moviecol_del(id=None):
+    moviecol = Moviecol.query.get_or_404(int(id))
+    db.session.delete(moviecol)
+    db.session.commit()
+    flash('收藏删除成功', 'ok')
+    return redirect(url_for('admin.moviecol_list', page=1))
 
 
 # 操作日志
