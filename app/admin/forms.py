@@ -220,3 +220,84 @@ class PreviewForm(FlaskForm):
             "class": "btn btn-primary",
         }
     )
+
+
+# 修改密码
+class PwdFrom(FlaskForm):
+    old_pwd = PasswordField(
+        label='旧密码',
+        validators=[
+            DataRequired('旧密码不能为空！')
+        ],
+        description='旧密码',
+        render_kw={
+            "type": "password",
+            "class": "form-control",
+            "id": "input_pwd",
+            "placeholder": "请输入旧密码！"
+        }
+    )
+
+    new_pwd = PasswordField(
+        label='新密码',
+        validators=[
+            DataRequired('新密码不能为空！')
+        ],
+        description='新密码',
+        render_kw={
+            "class": "form-control",
+            "id": "input_newpwd",
+            "placeholder": "请输入新密码！"
+        }
+    )
+
+    submit = SubmitField(
+        label='确定',
+        render_kw={
+            "class": "btn btn-primary"
+        }
+    )
+
+    #修改密码时，验证旧密码是否正确
+    def validate_old_pwd(self, field):
+        from flask import session
+        pwd = field.data
+        name = session['admin']
+        admin = Admin.query.filter_by(name=name).first()
+        if not admin.check_pwd(pwd):
+            raise ValidationError('旧密码输入错误！')
+
+
+class AuthFrom(FlaskForm):
+    name = StringField(
+        label='权限名称',
+        validators=[
+            DataRequired('权限名称不能为空！')
+        ],
+        description='权限名称',
+        render_kw={
+            "class": "form-control",
+            "id": "input_name",
+            "placeholder": "请输入权限名称！"
+        }
+    )
+
+    url = StringField(
+        label='权限地址',
+        validators=[
+            DataRequired('权限地址不能为空！')
+        ],
+        description='权限地址名称',
+        render_kw={
+            "class": "form-control",
+            "id": "input_name",
+            "placeholder": "请输入权限地址！"
+        }
+    )
+
+    submit = SubmitField(
+        label='确定',
+        render_kw={
+            "class": "btn btn-primary"
+        }
+    )

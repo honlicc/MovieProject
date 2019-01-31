@@ -196,12 +196,13 @@ if __name__ == "__main__":
     # db.session.commit()
 
     from werkzeug.security import generate_password_hash #密码hash加密
-    admin=Admin(
-        name='movie',
-        pwd=generate_password_hash('movie'),
-        is_super=0,
-        role_id=1,
-    )
 
-    db.session.add(admin)
-    db.session.commit()
+    # oplog=OpLog(
+    #     admin_id=1,
+    #     ip='127.0.0.1',
+    #     reason='添加标签123456'
+    # )
+    #
+    # db.session.add(oplog)
+    # db.session.commit()
+
