@@ -26,6 +26,9 @@ class User(db.Model):
     def __repr__(self):
         return "<User %r>" % self.name
 
+    def check_pwd(self,pwd):
+        return check_password_hash(self.pwd,pwd)
+
 
 # 会员日志
 class Usrelog(db.Model):
@@ -167,9 +170,6 @@ class AdminLog(db.Model):
     def __repr__(self):
         return "AdminLog %r" % self.id
 
-
-if __name__ == "__main__":
-    db.create_all()
 
 
 # 操作日志模型

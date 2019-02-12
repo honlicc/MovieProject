@@ -2,11 +2,13 @@
 # -*- coding:utf-8 -*-
 
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, FileField, TextAreaField, SelectField
-from wtforms.validators import DataRequired, ValidationError
+from wtforms.fields import StringField, PasswordField, SubmitField, FileField, TextAreaField, SelectField, SelectMultipleField
+from wtforms.validators import DataRequired, ValidationError, EqualTo
 from app.models import *
 
 tags = Tag.query.all()
+auths_list = Auth.query.all()
+role_list = Role.query.all()
 
 
 class LoginForm(FlaskForm):
@@ -258,7 +260,7 @@ class PwdFrom(FlaskForm):
         }
     )
 
-    #修改密码时，验证旧密码是否正确
+    # 修改密码时，验证旧密码是否正确
     def validate_old_pwd(self, field):
         from flask import session
         pwd = field.data
@@ -298,6 +300,95 @@ class AuthFrom(FlaskForm):
     submit = SubmitField(
         label='确定',
         render_kw={
+            "class": "btn btn-primary"
+        }
+    )
+
+
+class RoleFrom(FlaskForm):
+    name = StringField(
+        label='角色名称',
+        validators=[
+            DataRequired('请输入角色名称！')
+        ],
+        description='角色名称',
+        render_kw={
+            "class": "form-control",
+            "placeholder": "请输入角色名称！"
+        }
+    )
+
+    authos = SelectMultipleField(
+        label='权限列表',
+        validators=[
+            DataRequired('请选择权限列表！'),
+        ],
+        coerce=int,
+        choices=[(i.id, i.name) for i in auths_list],
+        render_kw={
+            "class": "form-control",
+        }
+    )
+
+    submit = SubmitField(
+        label='确定',
+        render_kw={
+            "class": "btn btn-primary"
+        }
+    )
+
+
+class AdminForm(FlaskForm):
+    name = StringField(
+        label='管理员名称',  # 标签
+        validators=[  # 验证器
+            DataRequired("请输入管理员名称！")
+        ],
+        description='管理员名称',  # 描述
+        render_kw={
+            "class": "form-control",
+            "placeholder": "请输入管理员名称！"
+        }
+    )
+
+    pwd = PasswordField(
+        label='管理员密码',  # 标签,展示在浏览器页面的字符串信息，如登录按钮中的‘登录’二字
+        validators=[  # 验证器
+            DataRequired("请输入管理员密码！")
+        ],
+        description='管理员密码',  # 描述
+        render_kw={
+            "class": "form-control",
+            "placeholder": "请输入管理员密码！"
+        }
+    )
+
+    repwd = PasswordField(
+        label='管理员重复密码',  # 标签,展示在浏览器页面的字符串信息，如登录按钮中的‘登录’二字
+        validators=[  # 验证器
+            DataRequired("请输入管理员重复密码！"),
+            EqualTo('pwd', message='两次密码不一致')
+        ],
+        description='管理员重复密码',  # 描述
+        render_kw={
+            "class": "form-control",
+            "placeholder": "请输入管理员重复密码！"
+        }
+    )
+
+    role_id = SelectField(
+        label='所属角色',
+        coerce=int,
+        choices=[(i.id, i.name) for i in role_list],
+        render_kw={
+            "class": "form-control"
+        }
+    )
+
+    submit = SubmitField(
+        label='确定',
+        render_kw={
+            "id": "btn-sub",
             "class": "btn btn-primary"
         }
     )
