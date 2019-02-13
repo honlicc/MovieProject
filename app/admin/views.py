@@ -57,9 +57,7 @@ def admin_auth(f):
 
 # 修改文件名称
 def change_filename(filename):
-    print(filename)
     fileinfo = os.path.splitext(filename)
-    print(fileinfo)
     filename = datetime.datetime.now().strftime('%Y%m%d%H%M%S') + str(uuid.uuid4().hex) + fileinfo[-1]
     return filename
 

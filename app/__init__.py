@@ -13,6 +13,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = "mysql://root:123456@localhost:3306/movi
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 app.config['SECRET_KEY'] = '7e020166dc284ad187e32cbda0a9d4ac'
 app.config['UP_DIR'] = os.path.join(os.path.abspath(os.path.dirname(__file__)),"static/uploads/" )
+app.config['FC_DIR'] = os.path.join(os.path.abspath(os.path.dirname(__file__)),"static/uploads/users/" )
 
 app.debug = True
 db = SQLAlchemy(app)

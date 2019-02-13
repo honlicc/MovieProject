@@ -391,6 +391,7 @@ $(function(){
 		});
 
 		$(".main_banner_box li").on("mousemove",function(){
+			console.log(1)
 			if($(this).css("width")=="670px"){//鼠标移入为当前正中显示的图片li，则清除定时器
 				clearInterval(intervaltimer);
 				intervaltimer=null;
