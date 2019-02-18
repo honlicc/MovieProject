@@ -361,6 +361,7 @@ def preview_list(page=None):
 @admin_auth
 def preview_del(id=None):
     preview = Preview.query.get_or_404(int(id))
+
     db.session.delete(preview)
     db.session.commit()
     flash('删除预告成功', 'ok')
@@ -554,7 +555,7 @@ def auth_list(page=None):
         page = 1
     page_data = Auth.query.order_by(
         Auth.addtime.desc()
-    ).paginate(page=page, per_page=10)
+    ).paginate(page=page, per_page=20)
     return render_template('admin/auth_list.html', page_data=page_data)
 
 
