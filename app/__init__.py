@@ -14,8 +14,9 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 app.config['SECRET_KEY'] = '7e020166dc284ad187e32cbda0a9d4ac'
 app.config['UP_DIR'] = os.path.join(os.path.abspath(os.path.dirname(__file__)),"static/uploads/" )
 app.config['FC_DIR'] = os.path.join(os.path.abspath(os.path.dirname(__file__)),"static/uploads/users/" )
+app.config['PAGE_SET'] = 10  # 分页上限数量
 
-app.debug = False
+app.debug = True
 db = SQLAlchemy(app)
 
 from app.home import home as home_blueprint

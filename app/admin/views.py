@@ -255,6 +255,7 @@ def movie_edit(id=None):
             os.chmod(app.config["UP_DIR"], "rw")  # 给文件夹赋予读写的权限
 
         # 如果data['url']不为空，则代表重新上传了视频，需要替换
+
         if data['url'] != '':
             # file_url = data['url']
             file_url = secure_filename(form.url.data.filename)

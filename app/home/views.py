@@ -29,6 +29,105 @@ def change_filename(filename):
     filename = datetime.datetime.now().strftime('%Y%m%d%H%M%S') + str(uuid.uuid4().hex) + fileinfo[-1]
     return filename
 
+# home index 首页
+@home.route('/')
+def index():
+    tags = Tag.query.all()
+
+    tid = request.args.get("tid", '')
+    star = request.args.get("star", '')
+    time = request.args.get("time", '')
+    pm = request.args.get("pm", '')
+    cm = request.args.get("cm", '')
+    pg = request.args.get("pg", '')
+
+    # 保存获取的参数
+    p = dict(
+        tid=tid,
+        star=star,
+        time=time,
+        pm=pm,
+        cm=cm
+    )
+
+    page_data = Movie.query
+    if tid.isdigit() and tid is not None:
+        page_data = page_data.filter_by(tag_id=int(tid))
+    if star.isdigit() and star is not None:
+        page_data = page_data.filter_by(star=int(star))
+    if time.isdigit() and time is not None:
+        page_data = page_data.order_by(
+            Movie.addtime.desc() if int(time) == 1 else Movie.addtime.asc()
+        )
+    if pm.isdigit() and pm is not None:
+        page_data = page_data.order_by(
+            Movie.playnum.desc() if int(pm) == 1 else Movie.playnum.asc()
+        )
+    if cm.isdigit() and cm is not None:
+        page_data = page_data.order_by(
+            Movie.commentnum.desc() if int(cm) == 1 else Movie.commentnum.asc()
+        )
+
+        # 分页处理
+    pages = page_data.count() // app.config['PAGE_SET'] if page_data.count() % app.config['PAGE_SET'] == 0 else page_data.count() // app.config['PAGE_SET'] + 1
+    page = int(pg) if pg.isdigit() and pg is not None and int(pg) <= pages else 1
+    page_data = page_data.paginate(page=page, per_page=app.config['PAGE_SET'])
+    '''
+    # 标签
+    tid = request.args.get('tid', 0)
+    if int(tid) != 0:
+        page_data = page_data.filter_by(tag_id=int(tid))
+    # 星级
+    star = request.args.get('star', 0)
+    if int(star) != 0:
+        page_data = page_data.filter_by(star=int(star))
+    # 时间
+    time = request.args.get('time', 0)
+    if int(time) != 0:
+        if int(time) == 1:
+            page_data = page_data.order_by(
+                Movie.addtime.desc()
+            )
+        else:
+            page_data = page_data.order_by(
+                Movie.addtime.asc()
+            )
+    # 播放量
+    pm = request.args.get('pm', 0)
+    if int(pm) != 0:
+        if int(pm) == 1:
+            page_data = page_data.order_by(
+                Movie.playnum.desc()
+            )
+        else:
+            page_data = page_data.order_by(
+                Movie.playnum.asc()
+            )
+    # 评论量
+    cm = request.args.get('cm', 0)
+    if int(cm) != 0:
+        if int(cm) == 1:
+            page_data = page_data.order_by(
+                Movie.commentnum.desc()
+            )
+        else:
+            page_data = page_data.order_by(
+                Movie.commentnum.asc()
+            )
+
+    if page is None:
+        page = 1
+    page_data = page_data.paginate(page=page, per_page=10)
+    p = dict(
+        tid=tid,
+        star=star,
+        time=time,
+        pm=pm,
+        cm=cm
+    )
+'''
+    return render_template('home/index.html', tags=tags, p=p, page_data=page_data)
+
 
 # home 会员登录
 @home.route('/login/', methods=["GET", "POST"])
@@ -218,64 +317,7 @@ def moviecol(page=None):
     return render_template('home/moviecol.html', page_data=page_data)
 
 
-# home index 首页
-@home.route('/<int:page>/', methods=["GET"])
-def index(page=None):
-    tags = Tag.query.all()
-    page_data = Movie.query
-    # 标签
-    tid = request.args.get('tid', 0)
-    if int(tid) != 0:
-        page_data = page_data.filter_by(tag_id=int(tid))
-    # 星级
-    star = request.args.get('star', 0)
-    if int(star) != 0:
-        page_data = page_data.filter_by(star=int(star))
-    # 时间
-    time = request.args.get('time', 0)
-    if int(time) != 0:
-        if int(time) == 1:
-            page_data = page_data.order_by(
-                Movie.addtime.desc()
-            )
-        else:
-            page_data = page_data.order_by(
-                Movie.addtime.asc()
-            )
-    # 播放量
-    pm = request.args.get('pm', 0)
-    if int(pm) != 0:
-        if int(pm) == 1:
-            page_data = page_data.order_by(
-                Movie.playnum.desc()
-            )
-        else:
-            page_data = page_data.order_by(
-                Movie.playnum.asc()
-            )
-    # 评论量
-    cm = request.args.get('cm', 0)
-    if int(cm) != 0:
-        if int(cm) == 1:
-            page_data = page_data.order_by(
-                Movie.commentnum.desc()
-            )
-        else:
-            page_data = page_data.order_by(
-                Movie.commentnum.asc()
-            )
 
-    if page is None:
-        page = 1
-    page_data = page_data.paginate(page=page, per_page=10)
-    p = dict(
-        tid=tid,
-        star=star,
-        time=time,
-        pm=pm,
-        cm=cm
-    )
-    return render_template('home/index.html', tags=tags, p=p, page_data=page_data)
 
 
 # home index 上映预告
