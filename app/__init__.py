@@ -15,7 +15,7 @@ app.config['SECRET_KEY'] = '7e020166dc284ad187e32cbda0a9d4ac'
 app.config['UP_DIR'] = os.path.join(os.path.abspath(os.path.dirname(__file__)),"static/uploads/" )
 app.config['FC_DIR'] = os.path.join(os.path.abspath(os.path.dirname(__file__)),"static/uploads/users/" )
 
-app.debug = True
+app.debug = False
 db = SQLAlchemy(app)
 
 from app.home import home as home_blueprint
